@@ -1,0 +1,6 @@
+[submodule "spm-rel-loader/rel/vendor/EABase"]
+	path = spm-rel-loader/rel/vendor/EABase
+	url = https://github.com/electronicarts/EABase.git
+[submodule "spm-rel-loader/rel/vendor/EASTL"]
+	path = spm-rel-loader/rel/vendor/EASTL
+	url = https://github.com/electronicarts/EASTL.git
