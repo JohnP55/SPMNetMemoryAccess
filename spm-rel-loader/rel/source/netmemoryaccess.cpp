@@ -53,7 +53,7 @@ void receiverLoop(u32 param) {
         return;
     }
     else {
-        wii::os::OSReport("Network initialized successfully.");
+        wii::os::OSReport("Network initialized successfully.\n");
     }
 
     mod::initCommands();
