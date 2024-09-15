@@ -50,9 +50,7 @@ void main()
 {
     wii::os::OSReport("SPM Rel Loader: the mod has ran!\n");
     
-    wii::os::OSReport("Initializing NetMemoryAccess\n");
     NetMemoryAccess::init();
-    wii::os::OSReport("Initialized.\n");
 
     titleScreenCustomTextPatch();
 }
