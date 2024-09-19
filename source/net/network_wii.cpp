@@ -91,14 +91,14 @@ typedef signed long long s64;
 
 enum {
 	IOCTL_SO_ACCEPT	= 1,
-	IOCTL_SO_BIND,   
-	IOCTL_SO_CLOSE,	
-	IOCTL_SO_CONNECT, 
+	IOCTL_SO_BIND,
+	IOCTL_SO_CLOSE,
+	IOCTL_SO_CONNECT,
 	IOCTL_SO_FCNTL,
 	IOCTL_SO_GETPEERNAME, // todo
 	IOCTL_SO_GETSOCKNAME, // todo
 	IOCTL_SO_GETSOCKOPT,  // todo    8
-	IOCTL_SO_SETSOCKOPT,  
+	IOCTL_SO_SETSOCKOPT,
 	IOCTL_SO_LISTEN,
 	IOCTL_SO_POLL,        // todo    b
 	IOCTLV_SO_RECVFROM,
@@ -126,7 +126,7 @@ enum {
 	IOCTL_SO_ICMPCANCEL,        // todo
 	IOCTL_SO_ICMPCLOSE          // todo
 };
-
+#define IPC_ENOENT			 -6
 struct bind_params {
 	u32 socket;
 	u32 has_name;
@@ -144,7 +144,7 @@ struct sendto_params {
 	u32 flags;
 	u32 has_destaddr;
 	u8 destaddr[28];
-}; 
+};
 
 struct setsockopt_params {
 	u32 socket;
@@ -158,12 +158,12 @@ struct setsockopt_params {
 // I sense a pattern here...
 static u8 _net_error_code_map[] = {
 	0, // 0
-	0, 
-	0, 
 	0,
-	0, 
+	0,
+	0,
+	0,
 	0, // 5
-	EAGAIN, 
+	EAGAIN,
 	EALREADY,
 	EINVAL,
 	0,
@@ -259,15 +259,15 @@ static s32 _open_manage_fd(void)
 	return ncd_fd;
 }
 
-s32 MyNCDGetLinkStatus(void) 
+s32 MyNCDGetLinkStatus(void)
 {
 	s32 ret, ncd_fd;
 	STACK_ALIGN(u8, linkinfo, 0x20, 32);
 	STACK_ALIGN(wii::ipc::Ioctlv, parms, 1, 32);
-  
+
 	ncd_fd = _open_manage_fd();
 	if (ncd_fd < 0) return ncd_fd;
-	
+
 	parms[0].data = linkinfo;
 	parms[0].len = 0x20;
 
@@ -283,13 +283,13 @@ static s32 MyNWC24iStartupSocket(void)
 {
 	s32 kd_fd, ret;
 	STACK_ALIGN(u8, kd_buf, 0x20, 32);
-	
+
 	kd_fd = _net_convert_error(wii::ipc::IOS_Open(__kd_fs, 0));
 	if (kd_fd < 0) {
 		debug_printf("wii::ipc::IOS_Open(%s) failed with code %d\n", __kd_fs, kd_fd);
 		return kd_fd;
 	}
-  
+
 	ret = _net_convert_error(wii::ipc::IOS_Ioctl(kd_fd, IOCTL_NWC24_STARTUP, NULL, 0, kd_buf, 0x20));
 	if (ret < 0) debug_printf("wii::ipc::IOS_Ioctl(6)=%d\n", ret);
   	wii::ipc::IOS_Close(kd_fd);
@@ -316,13 +316,13 @@ s32 Mynet_init(void)
 	u32 ip_addr = 0;
 
 	if (net_ip_top_fd >= 0) return 0;
-		
+
 	ret = MyNCDGetLinkStatus();  // this must be called as part of initialization
 	if (ret < 0) {
 		debug_printf("MyNCDGetLinkStatus returned %d\n", ret);
 		return ret;
 	}
-	
+
 	net_ip_top_fd = _net_convert_error(wii::ipc::IOS_Open(__iptop_fs, 0));
 	if (net_ip_top_fd < 0) {
 		debug_printf("wii::ipc::IOS_Open(/dev/net/ip/top)=%d\n", net_ip_top_fd);
@@ -360,7 +360,7 @@ s32 Mynet_init(void)
 error:
 	wii::ipc::IOS_Close(net_ip_top_fd);
 	net_ip_top_fd = -1;
-	return ret;	
+	return ret;
 }
 
 
@@ -386,7 +386,7 @@ struct hostent * Mynet_gethostbyname(char *addrString)
 	memcpy(params, addrString, len);
 
 	ret = _net_convert_error(wii::ipc::IOS_Ioctl(net_ip_top_fd, IOCTL_SO_GETHOSTBYNAME, params, len, ipBuffer, 0x460));
-	
+
 	if (ret < 0) {
 		errno = ret;
 		return NULL;
@@ -418,14 +418,14 @@ s32 Mynet_socket(u32 domain, u32 type, u32 protocol)
 	STACK_ALIGN(u32, params, 3, 32);
 
 	if (net_ip_top_fd < 0) return -ENXIO;
- 
+
 	params[0] = domain;
 	params[1] = type;
 	params[2] = protocol;
 
 	ret = _net_convert_error(wii::ipc::IOS_Ioctl(net_ip_top_fd, IOCTL_SO_SOCKET, params, 12, NULL, 0));
 	debug_printf("Mynet_socket(%d, %d, %d)=%d\n", domain, type, protocol, ret);
-	return ret;		
+	return ret;
 }
 
 s32 Mynet_shutdown(s32 s, u32 how)
@@ -440,7 +440,7 @@ s32 Mynet_shutdown(s32 s, u32 how)
 	ret = _net_convert_error(wii::ipc::IOS_Ioctl(net_ip_top_fd, IOCTL_SO_SHUTDOWN, params, 8, NULL, 0));
 
 	debug_printf("Mynet_shutdown(%d, %d)=%d\n", s, how, ret);
-	return ret;             
+	return ret;
 }
 
 s32 Mynet_bind(s32 s, struct sockaddr *name, socklen_t namelen)
@@ -478,7 +478,7 @@ s32 Mynet_listen(s32 s, u32 backlog)
 
 	ret = _net_convert_error(wii::ipc::IOS_Ioctl(net_ip_top_fd, IOCTL_SO_LISTEN, params, 8, NULL, 0));
   	debug_printf("Mynet_listen(%d, %d)=%d\n", s, backlog, ret);
-	return ret;	
+	return ret;
 }
 
 s32 Mynet_accept(s32 s, struct sockaddr *addr, socklen_t *addrlen)
@@ -512,7 +512,7 @@ s32 Mynet_connect(s32 s, struct sockaddr *addr, socklen_t addrlen)
 {
 	s32 ret;
 	STACK_ALIGN(struct connect_params,params,1,32);
-	
+
 	if (net_ip_top_fd < 0) return -ENXIO;
 	if (addr->sa_family != AF_INET) return -EAFNOSUPPORT;
 	if (addrlen < 8) return -EINVAL;
@@ -551,24 +551,24 @@ s32 Mynet_sendto(s32 s, const void *data, s32 len, u32 flags, struct sockaddr *t
 
 	if (net_ip_top_fd < 0) return -ENXIO;
 	if (tolen > 28) return -EOVERFLOW;
-	
+
 	STACK_ALIGN(u8, message_buf, len, 32);
-	
+
 	debug_printf("Mynet_sendto(%d, %p, %d, %d, %p, %d)\n", s, data, len, flags, to, tolen);
 
 	if (to && to->sa_len != tolen) {
 		debug_printf("warning: to->sa_len was %d, setting to %d\n",	to->sa_len, tolen);
 		to->sa_len = tolen;
 	}
-	
+
 	memset(params, 0, sizeof(struct sendto_params));
 	memcpy(message_buf, data, len);   // ensure message buf is aligned
 
-	params->socket = s;  
+	params->socket = s;
 	params->flags = flags;
 	if (to) {
 		params->has_destaddr = 1;
-		memcpy(params->destaddr, to, to->sa_len);		
+		memcpy(params->destaddr, to, to->sa_len);
 	} else {
 		params->has_destaddr = 0;
 	}
@@ -586,7 +586,7 @@ s32 Mynet_sendto(s32 s, const void *data, s32 len, u32 flags, struct sockaddr *t
 
 s32 Mynet_recv(s32 s, void *mem, s32 len, u32 flags)
 {
-    return Mynet_recvfrom(s, mem, len, flags, NULL, NULL);	
+    return Mynet_recvfrom(s, mem, len, flags, NULL, NULL);
 }
 
 s32 Mynet_recvfrom(s32 s, void *mem, s32 len, u32 flags, struct sockaddr *from, socklen_t *fromlen)
@@ -603,7 +603,7 @@ s32 Mynet_recvfrom(s32 s, void *mem, s32 len, u32 flags, struct sockaddr *from, 
 		debug_printf("warning: from->sa_len was %d, setting to %d\n",from->sa_len, *fromlen);
 		from->sa_len = *fromlen;
 	}
-	
+
 	STACK_ALIGN(u8, message_buf, len, 32);
 
 	debug_printf("Mynet_recvfrom(%d, '%s', %d, %d, %p, %d)\n", s, (char *)mem, len, flags, from, fromlen?*fromlen:0);
@@ -632,7 +632,7 @@ s32 Mynet_recvfrom(s32 s, void *mem, s32 len, u32 flags, struct sockaddr *from, 
 	}
 
 	if (fromlen && from) *fromlen = from->sa_len;
-	
+
 done:
 	return ret;
 }
@@ -684,7 +684,7 @@ s32 Mynet_setsockopt(s32 s, u32 level, u32 optname, const void *optval, socklen_
 	return ret;
 }
 
-s32 Mynet_ioctl(s32 s, u32 cmd, void *argp) 
+s32 Mynet_ioctl(s32 s, u32 cmd, void *argp)
 {
 	u32 flags;
 	u32 *intp = (u32 *)argp;
@@ -693,7 +693,7 @@ s32 Mynet_ioctl(s32 s, u32 cmd, void *argp)
 	if (!intp) return -EINVAL;
 
 	switch (cmd) {
-		case FIONBIO: 
+		case FIONBIO:
 			flags = Mynet_fcntl(s, F_GETFL, 0);
 			flags &= ~IOS_O_NONBLOCK;
 			if (*intp) flags |= IOS_O_NONBLOCK;
@@ -710,7 +710,7 @@ s32 Mynet_fcntl(s32 s, u32 cmd, u32 flags)
 
 	if (net_ip_top_fd < 0) return -ENXIO;
 	if (cmd != F_GETFL && cmd != F_SETFL) return -EINVAL;
-	
+
 
 	params[0] = s;
 	params[1] = cmd;
@@ -730,7 +730,7 @@ s32 Myif_config(char *local_ip, char *netmask, char *gateway,int use_dhcp)
 	struct in_addr hostip;
 
 	if ( use_dhcp != true ) return -EINVAL;
-	
+
 	for(i=0;i<MAX_INIT_RETRIES && (ret=Mynet_init())==-EAGAIN;i++);
 	if(ret<0) return ret;
 
@@ -738,10 +738,10 @@ s32 Myif_config(char *local_ip, char *netmask, char *gateway,int use_dhcp)
 	if ( local_ip!=NULL && hostip.s_addr ) {
 		strcpy(local_ip, inet_ntoa(hostip));
 	}
-	
+
 	return 0;
-	
-			
+
+
 }
 
 char *inet_ntoa(struct in_addr addr)

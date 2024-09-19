@@ -30,7 +30,7 @@ COMMAND(write, "Writes memory to the console. (write address base64_encoded_byte
     u32 dest = strtoul(args[0], NULL, 16);
     const char* b64data = args[1];
     s32 decodedLen = strtoul(args[2], NULL, 10);
-    
+
     if (!isValidBase64(b64data, decodedLen)) {
         msl::stdio::snprintf((char*)response, responseSize, "Error: Invalid Base64 data.\n");
         return (u32)msl::string::strlen((char*)response);
@@ -64,7 +64,7 @@ EVT_END()
 COMMAND(msgbox, "Displays a message box on the screen. (msgbox base64_encoded_string size)", 2, {
     const char* b64data = args[0];
     s32 msgboxTextLen = strtoul(args[1], NULL, 10);
-    
+
     if (!isValidBase64(b64data, msgboxTextLen)) {
         msl::stdio::snprintf((char*)response, responseSize, "Error: Invalid Base64 data.\n");
         return msl::string::strlen((char*)response);
@@ -88,7 +88,7 @@ EVT_DEFINE_USER_FUNC(evt_post_msgbox) {
 
 EVT_DEFINE_USER_FUNC(evt_deref) {
     s32 addr = spm::evtmgr_cmd::evtGetValue(evt, evt->pCurData[0]);
-    assert(isWithinMem1Range(addr));
+    assert(isWithinMem1Range(addr), "evt_deref error");
     s32* ptr = reinterpret_cast<s32*>(addr);
     spm::evtmgr_cmd::evtSetValue(evt, evt->pCurData[1], *ptr);
     return EVT_RET_CONTINUE;

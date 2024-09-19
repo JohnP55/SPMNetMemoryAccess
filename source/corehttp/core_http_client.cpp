@@ -614,8 +614,8 @@ static void processCompleteHeader( HTTPParsingContext_t * pParsingContext )
 {
     HTTPResponse_t * pResponse = NULL;
 
-    assert( pParsingContext != NULL );
-    assert( pParsingContext->pResponse != NULL );
+    assert( pParsingContext != NULL ,"core_http_client issue");
+    assert( pParsingContext->pResponse != NULL ,"core_http_client issue");
 
     pResponse = pParsingContext->pResponse;
 
@@ -624,7 +624,7 @@ static void processCompleteHeader( HTTPParsingContext_t * pParsingContext )
     if( ( pParsingContext->pLastHeaderField != NULL ) &&
         ( pParsingContext->pLastHeaderValue != NULL ) )
     {
-        assert( pResponse->headerCount < SIZE_MAX );
+        assert( pResponse->headerCount < SIZE_MAX ,"core_http_client issue");
         /* Increase the header count. */
         pResponse->headerCount++;
 
@@ -663,8 +663,8 @@ static int httpParserOnMessageBeginCallback( llhttp_t * pHttpParser )
 {
     HTTPParsingContext_t * pParsingContext = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
 
@@ -685,14 +685,14 @@ static int httpParserOnStatusCallback( llhttp_t * pHttpParser,
     HTTPParsingContext_t * pParsingContext = NULL;
     HTTPResponse_t * pResponse = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pLoc != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pLoc != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
     pResponse = pParsingContext->pResponse;
 
-    assert( pResponse != NULL );
+    assert( pResponse != NULL ,"core_http_client issue");
 
     /* Set the location of what to parse next. */
     pParsingContext->pBufferCur = pLoc + length;
@@ -726,14 +726,14 @@ static int httpParserOnHeaderFieldCallback( llhttp_t * pHttpParser,
     HTTPParsingContext_t * pParsingContext = NULL;
     HTTPResponse_t * pResponse = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pLoc != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pLoc != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
     pResponse = pParsingContext->pResponse;
 
-    assert( pResponse != NULL );
+    assert( pResponse != NULL ,"core_http_client issue");
 
     /* If this is the first time httpParserOnHeaderFieldCallback() has been
      * invoked on a response, then the start of the response headers is NULL. */
@@ -762,7 +762,7 @@ static int httpParserOnHeaderFieldCallback( llhttp_t * pHttpParser,
     }
     else
     {
-        assert( pParsingContext->lastHeaderFieldLen <= SIZE_MAX - length );
+        assert( pParsingContext->lastHeaderFieldLen <= SIZE_MAX - length ,"core_http_client issue");
         pParsingContext->lastHeaderFieldLen += length;
     }
 
@@ -782,9 +782,9 @@ static int httpParserOnHeaderValueCallback( llhttp_t * pHttpParser,
 {
     HTTPParsingContext_t * pParsingContext = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pLoc != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pLoc != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
 
@@ -808,7 +808,7 @@ static int httpParserOnHeaderValueCallback( llhttp_t * pHttpParser,
     /* Given that httpParserOnHeaderFieldCallback() is ALWAYS invoked before
      * httpParserOnHeaderValueCallback() is invoked, then the last header field
      * should never be NULL. This would indicate a bug in the llhttp library. */
-    assert( pParsingContext->pLastHeaderField != NULL );
+    assert( pParsingContext->pLastHeaderField != NULL ,"core_http_client issue");
 
     LogDebug( ( "Response parsing: Found a header value: "
                 "HeaderValue=%.*s",
@@ -826,19 +826,19 @@ static int httpParserOnHeadersCompleteCallback( llhttp_t * pHttpParser )
     HTTPParsingContext_t * pParsingContext = NULL;
     HTTPResponse_t * pResponse = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
     pResponse = pParsingContext->pResponse;
 
-    assert( pResponse != NULL );
-    assert( pParsingContext->pBufferCur != NULL );
+    assert( pResponse != NULL ,"core_http_client issue");
+    assert( pParsingContext->pBufferCur != NULL ,"core_http_client issue");
 
     /* The current location to parse was updated in previous callbacks and MUST
      * always be within the response buffer. */
-    assert( pParsingContext->pBufferCur >= ( const char * ) ( pResponse->pBuffer ) );
-    assert( pParsingContext->pBufferCur < ( const char * ) ( pResponse->pBuffer + pResponse->bufferLen ) );
+    assert( pParsingContext->pBufferCur >= ( const char * ) ( pResponse->pBuffer ) ,"core_http_client issue");
+    assert( pParsingContext->pBufferCur < ( const char * ) ( pResponse->pBuffer + pResponse->bufferLen ) ,"core_http_client issue");
 
     /* `\r\n\r\n`, `\r\n\n`, `\n\r\n`, and `\n\n` are all valid indicators of
      * the end of the response headers. To reduce complexity these characters
@@ -849,7 +849,7 @@ static int httpParserOnHeadersCompleteCallback( llhttp_t * pHttpParser )
     if( pResponse->pHeaders != NULL )
     {
         /* The start of the headers ALWAYS come before the the end of the headers. */
-        assert( ( const char * ) ( pResponse->pHeaders ) < pParsingContext->pBufferCur );
+        assert( ( const char * ) ( pResponse->pHeaders ) < pParsingContext->pBufferCur ,"core_http_client issue");
 
         /* MISRA Ref 10.8.1 [Essential type casting] */
         /* More details at: https://github.com/FreeRTOS/coreHTTP/blob/main/MISRA.md#rule-108 */
@@ -918,17 +918,17 @@ static int httpParserOnBodyCallback( llhttp_t * pHttpParser,
     HTTPResponse_t * pResponse = NULL;
     char * pNextWriteLoc = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pLoc != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pLoc != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
     pResponse = pParsingContext->pResponse;
 
-    assert( pResponse != NULL );
-    assert( pResponse->pBuffer != NULL );
-    assert( pLoc >= ( const char * ) ( pResponse->pBuffer ) );
-    assert( pLoc < ( const char * ) ( pResponse->pBuffer + pResponse->bufferLen ) );
+    assert( pResponse != NULL ,"core_http_client issue");
+    assert( pResponse->pBuffer != NULL ,"core_http_client issue");
+    assert( pLoc >= ( const char * ) ( pResponse->pBuffer ) ,"core_http_client issue");
+    assert( pLoc < ( const char * ) ( pResponse->pBuffer + pResponse->bufferLen ) ,"core_http_client issue");
 
     /* If this is the first time httpParserOnBodyCallback() has been invoked,
      * then the start of the response body is NULL. */
@@ -985,8 +985,8 @@ static int httpParserOnMessageCompleteCallback( llhttp_t * pHttpParser )
 {
     HTTPParsingContext_t * pParsingContext = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
 
     pParsingContext = ( HTTPParsingContext_t * ) ( pHttpParser->data );
 
@@ -1003,9 +1003,9 @@ static int httpParserOnMessageCompleteCallback( llhttp_t * pHttpParser )
 static void initializeParsingContextForFirstResponse( HTTPParsingContext_t * pParsingContext,
                                                       const HTTPRequestHeaders_t * pRequestHeaders )
 {
-    assert( pParsingContext != NULL );
-    assert( pRequestHeaders != NULL );
-    assert( pRequestHeaders->headersLen >= HTTP_MINIMUM_REQUEST_LINE_LENGTH );
+    assert( pParsingContext != NULL ,"core_http_client issue");
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
+    assert( pRequestHeaders->headersLen >= HTTP_MINIMUM_REQUEST_LINE_LENGTH ,"core_http_client issue");
 
     /* Initialize the callbacks that llhttp_execute will invoke. */
     llhttp_settings_init( &( pParsingContext->llhttpSettings ) );
@@ -1044,7 +1044,7 @@ static HTTPStatus_t processLlhttpError( const llhttp_t * pHttpParser )
 {
     HTTPStatus_t returnStatus = HTTPSuccess;
 
-    assert( pHttpParser != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
 
     /* llhttp_get_err_pos() may be used to get exact error locations, which was
      * not possible with the previous http-parser. */
@@ -1161,8 +1161,8 @@ static HTTPStatus_t parseHttpResponse( HTTPParsingContext_t * pParsingContext,
     HTTPStatus_t returnStatus;
     const char * parsingStartLoc = NULL;
 
-    assert( pParsingContext != NULL );
-    assert( pResponse != NULL );
+    assert( pParsingContext != NULL ,"core_http_client issue");
+    assert( pResponse != NULL ,"core_http_client issue");
 
     /* If this is the first time this parsing context is used, then set the
      * response input. */
@@ -1190,7 +1190,7 @@ static HTTPStatus_t parseHttpResponse( HTTPParsingContext_t * pParsingContext,
         /* This function is currently private to the HTTP Client library. It is
          * therefore a development bug to have this function invoked in
          * succession without the same response. */
-        assert( pParsingContext->pResponse == pResponse );
+        assert( pParsingContext->pResponse == pResponse ,"core_http_client issue");
     }
 
     /* Setting this allows the parsing context and response to be carried to
@@ -1233,8 +1233,8 @@ static uint8_t convertInt32ToAscii( int32_t value,
     uint8_t isNegative = 0U;
     char temp = '\0';
 
-    assert( pBuffer != NULL );
-    assert( bufferLength >= MAX_INT32_NO_OF_DECIMAL_DIGITS );
+    assert( pBuffer != NULL ,"core_http_client issue");
+    assert( bufferLength >= MAX_INT32_NO_OF_DECIMAL_DIGITS ,"core_http_client issue");
     ( void ) bufferLength;
 
     /* If the value is negative, write the '-' (minus) character to the buffer. */
@@ -1279,8 +1279,8 @@ static char * httpHeaderStrncpy( char * pDest,
     char * pRet = pDest;
     uint8_t hasError = 0U;
 
-    assert( pDest != NULL );
-    assert( pSrc != NULL );
+    assert( pDest != NULL ,"core_http_client issue");
+    assert( pSrc != NULL ,"core_http_client issue");
 
     for( ; i < len; i++ )
     {
@@ -1335,12 +1335,12 @@ static HTTPStatus_t addHeader( HTTPRequestHeaders_t * pRequestHeaders,
     const char * pHeaderEndIndicator = HTTP_HEADER_END_INDICATOR;
     const char * httpFieldSeparator = HTTP_HEADER_FIELD_SEPARATOR;
 
-    assert( pRequestHeaders != NULL );
-    assert( pRequestHeaders->pBuffer != NULL );
-    assert( pField != NULL );
-    assert( pValue != NULL );
-    assert( fieldLen != 0U );
-    assert( valueLen != 0U );
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
+    assert( pRequestHeaders->pBuffer != NULL ,"core_http_client issue");
+    assert( pField != NULL ,"core_http_client issue");
+    assert( pValue != NULL ,"core_http_client issue");
+    assert( fieldLen != 0U ,"core_http_client issue");
+    assert( valueLen != 0U ,"core_http_client issue");
 
     pBufferCur = ( char * ) ( pRequestHeaders->pBuffer + pRequestHeaders->headersLen );
     backtrackHeaderLen = pRequestHeaders->headersLen;
@@ -1432,7 +1432,7 @@ static HTTPStatus_t addRangeHeader( HTTPRequestHeaders_t * pRequestHeaders,
     const char * pHttpRangeRequestHeaderValuePrefix = HTTP_RANGE_REQUEST_HEADER_VALUE_PREFIX;
     const char * pHttpRangeRequestHeaderField = HTTP_RANGE_REQUEST_HEADER_FIELD;
 
-    assert( pRequestHeaders != NULL );
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
 
     /* This buffer uses a char type instead of the general purpose uint8_t
      * because the range value expected to be written is within the ASCII
@@ -1506,10 +1506,10 @@ static HTTPStatus_t writeRequestLine( HTTPRequestHeaders_t * pRequestHeaders,
     const char * pHttpProtocolVersion = HTTP_PROTOCOL_VERSION;
     const char * pHttpEmptyPath = HTTP_EMPTY_PATH;
 
-    assert( pRequestHeaders != NULL );
-    assert( pRequestHeaders->pBuffer != NULL );
-    assert( pMethod != NULL );
-    assert( methodLen != 0U );
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
+    assert( pRequestHeaders->pBuffer != NULL ,"core_http_client issue");
+    assert( pMethod != NULL ,"core_http_client issue");
+    assert( methodLen != 0U ,"core_http_client issue");
 
     toAddLen = methodLen +                 \
                SPACE_CHARACTER_LEN +       \
@@ -1800,9 +1800,9 @@ static HTTPStatus_t sendHttpData( const TransportInterface_t * pTransport,
     uint32_t lastSendTimeMs = 0U, timeSinceLastSendMs = 0U;
     uint32_t retryTimeoutMs = HTTP_SEND_RETRY_TIMEOUT_MS;
 
-    assert( pTransport != NULL );
-    assert( pTransport->send != NULL );
-    assert( pData != NULL );
+    assert( pTransport != NULL ,"core_http_client issue");
+    assert( pTransport->send != NULL ,"core_http_client issue");
+    assert( pData != NULL ,"core_http_client issue");
 
     /* If the timestamp function was undefined by the application, then do not
      * retry the transport send. */
@@ -1835,7 +1835,7 @@ static HTTPStatus_t sendHttpData( const TransportInterface_t * pTransport,
              * more bytes than expected are sent. To avoid a possible overflow
              * in converting bytesRemaining from unsigned to signed, this assert
              * must exist after the check for bytesSent being negative. */
-            assert( ( size_t ) bytesSent <= bytesRemaining );
+            assert( ( size_t ) bytesSent <= bytesRemaining ,"core_http_client line 1838");
 
             /* Record the most recent time of successful transmission. */
             lastSendTimeMs = getTimestampMs();
@@ -1875,8 +1875,8 @@ static HTTPStatus_t addContentLengthHeader( HTTPRequestHeaders_t * pRequestHeade
     char pContentLengthValue[ MAX_INT32_NO_OF_DECIMAL_DIGITS ] = { '\0' };
     uint8_t contentLengthValueNumBytes = 0U;
 
-    assert( pRequestHeaders != NULL );
-    assert( contentLength > 0U );
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
+    assert( contentLength > 0U ,"core_http_client issue");
 
     contentLengthValueNumBytes = convertInt32ToAscii( ( int32_t ) contentLength,
                                                       pContentLengthValue,
@@ -1909,9 +1909,9 @@ static HTTPStatus_t sendHttpHeaders( const TransportInterface_t * pTransport,
     HTTPStatus_t returnStatus = HTTPSuccess;
     uint8_t shouldSendContentLength = 0U;
 
-    assert( pTransport != NULL );
-    assert( pTransport->send != NULL );
-    assert( pRequestHeaders != NULL );
+    assert( pTransport != NULL ,"core_http_client issue");
+    assert( pTransport->send != NULL ,"core_http_client issue");
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
 
     /* Send the content length header if the flag to disable is not set and the
      * body length is greater than zero. */
@@ -1945,9 +1945,9 @@ static HTTPStatus_t sendHttpBody( const TransportInterface_t * pTransport,
 {
     HTTPStatus_t returnStatus = HTTPSuccess;
 
-    assert( pTransport != NULL );
-    assert( pTransport->send != NULL );
-    assert( pRequestBodyBuf != NULL );
+    assert( pTransport != NULL ,"core_http_client issue");
+    assert( pTransport->send != NULL ,"core_http_client issue");
+    assert( pRequestBodyBuf != NULL ,"core_http_client issue");
 
     /* Send the request body. */
     LogDebug( ( "Sending the HTTP request body: BodyBytes=%lu",
@@ -1966,8 +1966,8 @@ static HTTPStatus_t getFinalResponseStatus( HTTPParsingState_t parsingState,
     HTTPStatus_t returnStatus = HTTPSuccess;
 
     assert( parsingState >= HTTP_PARSING_NONE &&
-            parsingState <= HTTP_PARSING_COMPLETE );
-    assert( totalReceived <= responseBufferLen );
+            parsingState <= HTTP_PARSING_COMPLETE ,"core_http_client issue");
+    assert( totalReceived <= responseBufferLen ,"core_http_client issue");
 
     /* If no parsing occurred, that means network data was never received. */
     if( parsingState == HTTP_PARSING_NONE )
@@ -2018,10 +2018,10 @@ static HTTPStatus_t receiveAndParseHttpResponse( const TransportInterface_t * pT
     uint32_t lastRecvTimeMs = 0U, timeSinceLastRecvMs = 0U;
     uint32_t retryTimeoutMs = HTTP_RECV_RETRY_TIMEOUT_MS;
 
-    assert( pTransport != NULL );
-    assert( pTransport->recv != NULL );
-    assert( pResponse != NULL );
-    assert( pRequestHeaders != NULL );
+    assert( pTransport != NULL ,"core_http_client issue");
+    assert( pTransport->recv != NULL ,"core_http_client issue");
+    assert( pResponse != NULL ,"core_http_client issue");
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
 
     /* Initialize the parsing context for parsing the response received from the
      * network. */
@@ -2134,11 +2134,11 @@ static HTTPStatus_t sendHttpRequest( const TransportInterface_t * pTransport,
 {
     HTTPStatus_t returnStatus = HTTPSuccess;
 
-    assert( pTransport != NULL );
-    assert( pRequestHeaders != NULL );
+    assert( pTransport != NULL ,"core_http_client issue");
+    assert( pRequestHeaders != NULL ,"core_http_client issue");
     assert( ( pRequestBodyBuf != NULL ) ||
-            ( ( pRequestBodyBuf == NULL ) && ( reqBodyBufLen == 0 ) ) );
-    assert( getTimestampMs != NULL );
+            ( ( pRequestBodyBuf == NULL ) && ( reqBodyBufLen == 0 ) ) ,"core_http_client issue");
+    assert( getTimestampMs != NULL ,"core_http_client issue");
 
     /* Send the headers, which are at one location in memory. */
     returnStatus = sendHttpHeaders( pTransport,
@@ -2277,19 +2277,19 @@ static int findHeaderFieldParserCallback( llhttp_t * pHttpParser,
 {
     findHeaderContext_t * pContext = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pFieldLoc != NULL );
-    assert( fieldLen > 0U );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pFieldLoc != NULL ,"core_http_client issue");
+    assert( fieldLen > 0U ,"core_http_client issue");
 
     pContext = ( findHeaderContext_t * ) pHttpParser->data;
 
-    assert( pContext->pField != NULL );
-    assert( pContext->fieldLen > 0U );
+    assert( pContext->pField != NULL ,"core_http_client issue");
+    assert( pContext->fieldLen > 0U ,"core_http_client issue");
 
     /* The header found flags should not be set. */
-    assert( pContext->fieldFound == 0U );
-    assert( pContext->valueFound == 0U );
+    assert( pContext->fieldFound == 0U ,"core_http_client issue");
+    assert( pContext->valueFound == 0U ,"core_http_client issue");
 
     /* Check whether the parsed header matches the header we are looking for. */
     /* Each header field consists of a case-insensitive field name (RFC 7230, section 3.2). */
@@ -2320,19 +2320,19 @@ static int findHeaderValueParserCallback( llhttp_t * pHttpParser,
     int retCode = LLHTTP_CONTINUE_PARSING;
     findHeaderContext_t * pContext = NULL;
 
-    assert( pHttpParser != NULL );
-    assert( pHttpParser->data != NULL );
-    assert( pValueLoc != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
+    assert( pHttpParser->data != NULL ,"core_http_client issue");
+    assert( pValueLoc != NULL ,"core_http_client issue");
 
     pContext = ( findHeaderContext_t * ) pHttpParser->data;
 
-    assert( pContext->pField != NULL );
-    assert( pContext->fieldLen > 0U );
-    assert( pContext->pValueLoc != NULL );
-    assert( pContext->pValueLen != NULL );
+    assert( pContext->pField != NULL ,"core_http_client issue");
+    assert( pContext->fieldLen > 0U ,"core_http_client issue");
+    assert( pContext->pValueLoc != NULL ,"core_http_client issue");
+    assert( pContext->pValueLen != NULL ,"core_http_client issue");
 
     /* The header value found flag should not be set. */
-    assert( pContext->valueFound == 0U );
+    assert( pContext->valueFound == 0U ,"core_http_client issue");
 
     if( pContext->fieldFound == 1U )
     {
@@ -2381,7 +2381,7 @@ static int findHeaderOnHeaderCompleteCallback( llhttp_t * pHttpParser )
     /* Disable unused variable warning. */
     ( void ) pContext;
 
-    assert( pHttpParser != NULL );
+    assert( pHttpParser != NULL ,"core_http_client issue");
 
     pContext = ( findHeaderContext_t * ) pHttpParser->data;
 
@@ -2442,7 +2442,7 @@ static HTTPStatus_t findHeaderInResponse( const uint8_t * pBuffer,
     if( context.fieldFound == 0U )
     {
         /* If header field is not found, then both the flags should be zero. */
-        assert( context.valueFound == 0U );
+        assert( context.valueFound == 0U ,"core_http_client issue");
 
         /* Header is not present in buffer. */
         LogWarn( ( "Header not found in response buffer: RequestedHeader=%.*s",
@@ -2467,7 +2467,7 @@ static HTTPStatus_t findHeaderInResponse( const uint8_t * pBuffer,
     else
     {
         /* Header is found. */
-        assert( ( context.fieldFound == 1U ) && ( context.valueFound == 1U ) );
+        assert( ( context.fieldFound == 1U ) && ( context.valueFound == 1U ) ,"core_http_client issue");
 
         LogDebug( ( "Found requested header in response: "
                     "HeaderName=%.*s, HeaderValue=%.*s",

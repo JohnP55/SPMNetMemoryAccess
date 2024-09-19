@@ -55,7 +55,7 @@ else
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR)).$(VERSION)
 BUILD		:=	build.$(VERSION)
-SOURCES		:=	source $(wildcard source/*)
+SOURCES		:=	source $(wildcard source/*) vendor/EASTL/source $(wildcard vendor/EASTL/source/*)
 DATA		:=	data  
 INCLUDES	:=	include spm-headers/include spm-headers/mod vendor/EABase/include/Common vendor/EABase/include/Common vendor/EASTL/include
 
