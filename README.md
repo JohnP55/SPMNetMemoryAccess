@@ -2,7 +2,7 @@
 # Network Memory Accessor for Super Paper Mario
 A mod that allows for memory reading and writing over the network.
 
-#### Note : Currently, only the eu0 and us2 versions can be built as I've not ported the symbols to other regions.
+#### Note : Current supported versions: eu0, us2, jp1
 
 ## How To Use
 
